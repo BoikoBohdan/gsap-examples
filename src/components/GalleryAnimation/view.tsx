@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { gsap } from "gsap";
 import { Flip } from "gsap/dist/Flip";
 import { useIsomorphicLayoutEffect } from "@/src/helpers/isomorphicEffect";
@@ -18,10 +18,11 @@ const GalleryAnimation = ({
   caption?: string;
 }) => {
   const galleryRef = useRef<HTMLElement>();
+  const [ctx] = useState(gsap.context(() => {}, galleryRef));
+  
   useIsomorphicLayoutEffect(() => {
     const galleryEl = galleryRef.current;
-    if (!galleryRef || !galleryEl) return;
-    let ctx = gsap.context(() => {
+    if (!galleryRef || !galleryEl || !ctx) return;
       let _settings = Object.assign({}, DEFAULT_GALLERY_SETTINGS, settings);
       const galleryCaption = galleryEl.querySelector(".caption");
       const galleryItems = galleryEl.querySelectorAll(".gallery__item");
@@ -30,7 +31,7 @@ const GalleryAnimation = ({
         .flat();
       _settings.scrollTrigger.trigger = galleryEl;
       _settings.scrollTrigger.pin = galleryEl.parentElement;
-      console.log(_settings)
+
       // Temporarily add the final class to capture the final state
       galleryEl.classList.add("gallery--switch");
 
@@ -63,10 +64,8 @@ const GalleryAnimation = ({
           0
         );
       }
-    });
-
     return () => ctx.revert(); // cleanup
-  });
+  }, [ctx]);
 
   return (
     <div className="gallery-wrap">
